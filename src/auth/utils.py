@@ -9,7 +9,7 @@ from database.database import get_async_session
 from .config import auth_settings
 from .models import User
 from .schemas import TokenData
-from .services import UserService
+from . import services
 
 
 password_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -48,7 +48,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    user = await UserService(session).get_user_by_username(token_data.username)
+    user = await services.UserService(session).get_user_by_username(token_data.username)
 
     if not user:
         raise credentials_exception
