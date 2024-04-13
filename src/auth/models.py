@@ -9,7 +9,7 @@ from database.database import Base
 class User(Base):
     __tablename__ = 'users'
 
-    uuid: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4())
+    uuid: Mapped[str] = mapped_column(primary_key=True, default=str(uuid.uuid4()))
     username: Mapped[str] = mapped_column(String(20), unique=True)
     email: Mapped[str] = mapped_column(String(320), unique=True)
 
@@ -21,6 +21,6 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_verified: Mapped[bool] = mapped_column(default=False)
     is_superuser: Mapped[bool] = mapped_column(default=False)
-
+    
     def __repr__(self) -> str:
         return f'User({self.uuid=}, {self.username=}, {self.email=})'
