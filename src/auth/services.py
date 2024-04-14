@@ -36,9 +36,11 @@ class UserService(BaseService):
         return user
 
     async def get_user_by_uuid(self, uuid: str) -> User:
-        user = await self.session.execute(
-            select(User).filter(User.uuid == uuid)
-        )
+        user = (
+            await self.session.execute(
+                select(User).filter(User.uuid == uuid)
+            )
+        ).scalar()
 
         if not user:
             raise HTTPException(
@@ -48,12 +50,14 @@ class UserService(BaseService):
         
         await self.session.commit()
 
-        return user.scalar()
+        return user
 
     async def get_user_by_username(self, username: str) -> User:
-        user = await self.session.execute(
-            select(User).filter(User.username == username)
-        )
+        user = (
+            await self.session.execute(
+                select(User).filter(User.username == username)
+            )
+        ).scalar()
 
         if not user:
             raise HTTPException(
@@ -63,12 +67,14 @@ class UserService(BaseService):
         
         await self.session.commit()
 
-        return user.scalar()
+        return user
 
     async def get_user_by_email(self, email: str):
-        user = await self.session.execute(
-            select(User).filter(User.email == email)
-        )
+        user = (
+            await self.session.execute(
+                select(User).filter(User.email == email)
+            )
+        ).scalar()
 
         if not user:
             raise HTTPException(
@@ -78,4 +84,4 @@ class UserService(BaseService):
         
         await self.session.commit()
 
-        return user.scalar()
+        return user

@@ -13,7 +13,7 @@ from . import services
 
 
 password_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='api/v1/login')
 
 
 def hash_password(password: str) -> str:
@@ -27,7 +27,7 @@ async def get_current_user(
     session: AsyncSession = Depends(get_async_session)
 ) -> User:
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Invalid credentials.',
         headers={'WWW-Authenticate': 'Bearer'},
     )
@@ -43,7 +43,7 @@ async def get_current_user(
 
         if not username:
             raise credentials_exception
-        
+
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception

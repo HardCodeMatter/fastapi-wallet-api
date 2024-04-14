@@ -6,6 +6,7 @@ from database.database import get_async_session
 
 from .managers import authenticate_user, create_access_token
 from .schemas import Token, UserCreate, UserRead
+from .utils import get_current_user
 from . import services
 
 
@@ -39,3 +40,11 @@ async def signup(
     session: AsyncSession = Depends(get_async_session),
 ) -> UserRead:
     return await services.UserService(session).create_user(user_data)
+
+
+@router.get('/users/{username}', dependencies=[Depends(get_current_user)])
+async def get_user_by_username(
+    username: str,
+    session: AsyncSession = Depends(get_async_session),
+) -> UserRead:
+    return await services.UserService(session).get_user_by_username(username)
