@@ -10,7 +10,11 @@ from .utils import hash_password
 
 class UserService(BaseService):
     async def create_user(self, user_data: UserCreate) -> User:
-        username = await UserService(self.session).get_user_by_username(user_data.username)
+        username = (
+            await self.session.execute(
+                select(User).filter(User.username == user_data.username)
+            )
+        ).scalar()
 
         if username:
             raise HTTPException(
@@ -18,7 +22,11 @@ class UserService(BaseService):
                 detail='User with this username is already exist.',
             )
         
-        email = await UserService(self.session).get_user_by_email(user_data.email)
+        email = (
+            await self.session.execute(
+                select(User).filter(User.email == user_data.email)
+            )
+        ).scalar()
 
         if email:
             raise HTTPException(
