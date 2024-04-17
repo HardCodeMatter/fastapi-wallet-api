@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -47,4 +47,12 @@ async def get_user_by_username(
     username: str,
     session: AsyncSession = Depends(get_async_session),
 ) -> UserRead:
-    return await services.UserService(session).get_user_by_username(username)
+    user = await services.UserService(session).get_user_by_username(username)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User with this username is not found.',
+        )
+    
+    return user

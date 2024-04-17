@@ -10,11 +10,7 @@ from .utils import hash_password
 
 class UserService(BaseService):
     async def create_user(self, user_data: UserCreate) -> User:
-        username = (
-            await self.session.execute(
-                select(User).filter(User.username == user_data.username)
-            )
-        ).scalar()
+        username = await self.get_user_by_username(user_data.username)
 
         if username:
             raise HTTPException(
@@ -22,11 +18,7 @@ class UserService(BaseService):
                 detail='User with this username is already exist.',
             )
         
-        email = (
-            await self.session.execute(
-                select(User).filter(User.email == user_data.email)
-            )
-        ).scalar()
+        email = await self.get_user_by_email(user_data.email)
 
         if email:
             raise HTTPException(
@@ -43,23 +35,6 @@ class UserService(BaseService):
 
         return user
 
-    async def get_user_by_uuid(self, uuid: str) -> User:
-        user = (
-            await self.session.execute(
-                select(User).filter(User.uuid == uuid)
-            )
-        ).scalar()
-
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User with this UUID is not found.',
-            )
-        
-        await self.session.commit()
-
-        return user
-
     async def get_user_by_username(self, username: str) -> User:
         user = (
             await self.session.execute(
@@ -67,12 +42,6 @@ class UserService(BaseService):
             )
         ).scalar()
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User with this username is not found.',
-            )
-        
         await self.session.commit()
 
         return user
@@ -84,12 +53,6 @@ class UserService(BaseService):
             )
         ).scalar()
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User with this email is not found.',
-            )
-        
         await self.session.commit()
 
         return user
