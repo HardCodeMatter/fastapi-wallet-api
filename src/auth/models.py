@@ -1,9 +1,13 @@
+import typing
 import uuid
 from datetime import datetime
 from sqlalchemy import String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
+
+if typing.TYPE_CHECKING:
+    from wallet.models import Account
 
 
 class User(Base):
@@ -14,6 +18,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
 
     hashed_password: Mapped[str]
+
+    accounts: Mapped[list['Account']] = relationship(back_populates='creator')
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
