@@ -13,7 +13,7 @@ if typing.TYPE_CHECKING:
 class Account(Base):
     __tablename__ = 'accounts'
 
-    uuid: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4())
+    uuid: Mapped[str] = mapped_column(primary_key=True, default=str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(30), unique=True)
     
     creator_id: Mapped[int] = mapped_column(ForeignKey('users.uuid', ondelete='CASCADE'))

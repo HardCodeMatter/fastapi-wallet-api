@@ -10,6 +10,12 @@ class AccountBase(BaseModel):
     @field_validator('name')
     @classmethod
     def validate_name(cls, value: str) -> str:
+        if ' ' in value.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Account name can not contain spaces',
+            )
+
         if len(value.strip()) < 3 or len(value.strip()) > 30:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -20,10 +26,10 @@ class AccountBase(BaseModel):
 
 
 class AccountCreate(AccountBase):
-    creator_id: int
     is_private: bool
 
 
 class AccountRead(AccountBase):
     uuid: str
+    is_private: bool
     creator: 'schemas.UserRead'
