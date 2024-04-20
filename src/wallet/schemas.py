@@ -33,3 +33,7 @@ class AccountRead(AccountBase):
     uuid: str
     is_private: bool
     creator: 'schemas.UserRead'
+
+
+class AccountUpdate(AccountBase):
+    is_private: bool

@@ -5,7 +5,7 @@ from database.database import get_async_session
 from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
-from .schemas import AccountCreate, AccountRead
+from .schemas import AccountCreate, AccountRead, AccountUpdate
 from . import services
 
 
@@ -23,7 +23,7 @@ async def create_account(
     return await services.WalletService(session).create_account(account_data, current_user)
 
 
-@router.get('/accounts/{name}')
+@router.get('/accounts/{name}/')
 async def get_account_by_name(
     name: str,
     current_user: User = Depends(get_current_user),
@@ -44,3 +44,21 @@ async def get_account_by_name(
         )
     
     return account
+
+
+@router.patch('/accounts/{uuid}/update')
+async def update_account(
+    uuid: str,
+    account_data: AccountUpdate,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> AccountRead:
+    account = await services.WalletService(session).get_account_by_uuid(uuid)
+
+    if account.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot update this account, because you are not creator.',
+        )
+    
+    return await services.WalletService(session).update_account(uuid, account_data)

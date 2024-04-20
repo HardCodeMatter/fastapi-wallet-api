@@ -6,7 +6,7 @@ from services import BaseService
 from auth.models import User
 
 from .models import Account
-from .schemas import AccountCreate
+from .schemas import AccountCreate, AccountUpdate
 
 
 class WalletService(BaseService):
@@ -28,6 +28,19 @@ class WalletService(BaseService):
         await self.session.commit()
 
         return account
+    
+    async def get_account_by_uuid(self, uuid: str) -> Account:
+        account = (
+            await self.session.execute(
+                select(Account)
+                .filter(Account.uuid == uuid)
+                .options(joinedload(Account.creator))
+            )
+        ).scalar()
+
+        await self.session.commit()
+
+        return account
 
     async def get_account_by_name(self, name: str) -> Account:
         account = (
@@ -37,6 +50,22 @@ class WalletService(BaseService):
                 .options(joinedload(Account.creator))
             )
         ).scalar()
+
+        await self.session.commit()
+
+        return account
+
+    async def update_account(self, uuid: int, account_data: AccountUpdate) -> Account:
+        account = await self.get_account_by_uuid(uuid)
+
+        if not account:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Account is not found.',
+            )
+        
+        account.name = account_data.name
+        account.is_private = account_data.is_private
 
         await self.session.commit()
 
