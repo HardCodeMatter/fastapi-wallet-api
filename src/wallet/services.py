@@ -16,7 +16,7 @@ class AccountService(BaseService):
         if account:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail='Account with this username is already exist.',
+                detail='Account with this name is already exist.',
             )
 
         account = Account(
@@ -70,3 +70,13 @@ class AccountService(BaseService):
         await self.session.commit()
 
         return account
+    
+    async def delete_account(self, uuid: str) -> Account:
+        account = await self.get_account_by_uuid(uuid)
+        
+        await self.session.delete(account)
+        await self.session.commit()
+
+        return {
+            'detail': 'Account is deleted successful.',
+        }

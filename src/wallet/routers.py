@@ -62,3 +62,26 @@ async def update_account(
         )
     
     return await services.AccountService(session).update_account(uuid, account_data)
+
+
+@router.delete('/accounts/{uuid}/delete')
+async def delete_account(
+    uuid: str,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> dict:
+    account = await services.AccountService(session).get_account_by_uuid(uuid)
+
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Account is not found.',
+        )
+
+    if account.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot delete this account, because you are not creator.',
+        )
+    
+    return await services.AccountService(session).delete_account(uuid)
