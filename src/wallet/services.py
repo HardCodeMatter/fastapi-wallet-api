@@ -9,7 +9,7 @@ from .models import Account
 from .schemas import AccountCreate, AccountUpdate
 
 
-class WalletService(BaseService):
+class AccountService(BaseService):
     async def create_account(self, account_data: AccountCreate, current_user: User) -> Account:
         account = await self.get_account_by_name(account_data.name)
 

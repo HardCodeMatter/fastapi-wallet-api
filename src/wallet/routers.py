@@ -20,7 +20,7 @@ async def create_account(
     current_user: User = Depends(get_current_active_user),
     session: AsyncSession = Depends(get_async_session),
 ) -> AccountRead:
-    return await services.WalletService(session).create_account(account_data, current_user)
+    return await services.AccountService(session).create_account(account_data, current_user)
 
 
 @router.get('/accounts/{name}/')
@@ -29,7 +29,7 @@ async def get_account_by_name(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ) -> AccountRead:
-    account = await services.WalletService(session).get_account_by_name(name)
+    account = await services.AccountService(session).get_account_by_name(name)
 
     if not account:
         raise HTTPException(
@@ -53,7 +53,7 @@ async def update_account(
     current_user: User = Depends(get_current_active_user),
     session: AsyncSession = Depends(get_async_session),
 ) -> AccountRead:
-    account = await services.WalletService(session).get_account_by_uuid(uuid)
+    account = await services.AccountService(session).get_account_by_uuid(uuid)
 
     if account.creator_id != current_user.uuid:
         raise HTTPException(
@@ -61,4 +61,4 @@ async def update_account(
             detail='You cannot update this account, because you are not creator.',
         )
     
-    return await services.WalletService(session).update_account(uuid, account_data)
+    return await services.AccountService(session).update_account(uuid, account_data)
