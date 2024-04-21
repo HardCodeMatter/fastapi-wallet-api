@@ -54,6 +54,18 @@ class AccountService(BaseService):
         await self.session.commit()
 
         return account
+    
+    async def get_accounts_by_creator_id(self, uuid: str) -> list[Account]:
+        accounts = (
+            await self.session.execute(
+                select(Account)
+                .filter(Account.creator_id == uuid)
+            )
+        ).scalars().all()
+
+        await self.session.commit()
+
+        return accounts
 
     async def update_account(self, uuid: int, account_data: AccountUpdate) -> Account:
         account = await self.get_account_by_uuid(uuid)

@@ -5,7 +5,7 @@ from database.database import get_async_session
 from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
-from .schemas import AccountCreate, AccountRead, AccountUpdate
+from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate
 from . import services
 
 
@@ -21,6 +21,22 @@ async def create_account(
     session: AsyncSession = Depends(get_async_session),
 ) -> AccountRead:
     return await services.AccountService(session).create_account(account_data, current_user)
+
+
+@router.get('/accounts')
+async def get_accounts_by_creator(
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> list[AccountListRead]:
+    accounts = await services.AccountService(session).get_accounts_by_creator_id(current_user.uuid)
+
+    if not accounts:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Accounts are not found.',
+        )
+
+    return accounts
 
 
 @router.get('/accounts/{name}/')
