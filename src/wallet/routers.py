@@ -9,12 +9,10 @@ from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate
 from . import services
 
 
-router = APIRouter(
-    tags=['Wallet'],
-)
+router = APIRouter()
 
 
-@router.post('/accounts', status_code=status.HTTP_201_CREATED)
+@router.post('/accounts', tags=['Accounts'], status_code=status.HTTP_201_CREATED)
 async def create_account(
     account_data: AccountCreate,
     current_user: User = Depends(get_current_active_user),
@@ -23,7 +21,7 @@ async def create_account(
     return await services.AccountService(session).create_account(account_data, current_user)
 
 
-@router.get('/accounts')
+@router.get('/accounts', tags=['Accounts'])
 async def get_accounts_by_creator(
     current_user: User = Depends(get_current_active_user),
     session: AsyncSession = Depends(get_async_session),
@@ -39,7 +37,7 @@ async def get_accounts_by_creator(
     return accounts
 
 
-@router.get('/accounts/{name}')
+@router.get('/accounts/{name}', tags=['Accounts'])
 async def get_account_by_name(
     name: str,
     current_user: User = Depends(get_current_user),
@@ -62,7 +60,7 @@ async def get_account_by_name(
     return account
 
 
-@router.patch('/accounts/{uuid}')
+@router.patch('/accounts/{uuid}', tags=['Accounts'])
 async def update_account(
     uuid: str,
     account_data: AccountUpdate,
@@ -80,7 +78,7 @@ async def update_account(
     return await services.AccountService(session).update_account(uuid, account_data)
 
 
-@router.delete('/accounts/{uuid}')
+@router.delete('/accounts/{uuid}', tags=['Accounts'])
 async def delete_account(
     uuid: str,
     current_user: User = Depends(get_current_active_user),
