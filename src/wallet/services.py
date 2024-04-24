@@ -5,8 +5,8 @@ from sqlalchemy.orm import joinedload
 from services import BaseService
 from auth.models import User
 
-from .models import Account
-from .schemas import AccountCreate, AccountUpdate
+from .models import Account, Category
+from .schemas import AccountCreate, AccountUpdate, CategoryCreate
 
 
 class AccountService(BaseService):
@@ -92,3 +92,30 @@ class AccountService(BaseService):
         return {
             'detail': 'Account is deleted successful.',
         }
+
+
+class CategoryService(BaseService):
+    async def create_category(self, category_data: CategoryCreate, current_user: User) -> Category:
+        category = Category(
+            creator_id=current_user.uuid,
+            **category_data.model_dump(),
+        )
+
+        self.session.add(category)
+        await self.session.commit()
+        await self.session.refresh(category)
+
+        return category
+
+    async def get_category_by_uuid(self, uuid: str) -> Category:
+        category = (
+            await self.session.execute(
+                select(Category)
+                .filter(Category.uuid == uuid)
+                .options(joinedload(Category.creator))
+            )
+        ).scalar()
+
+        await self.session.commit()
+
+        return category

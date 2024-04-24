@@ -3,6 +3,8 @@ from pydantic import BaseModel, field_validator
 
 from auth import schemas
 
+from .models import CategoryType
+
 
 class AccountBase(BaseModel):
     name: str
@@ -42,3 +44,21 @@ class AccountListRead(AccountBase):
 
 class AccountUpdate(AccountBase):
     is_private: bool
+
+
+class CategoryBase(BaseModel):
+    name: str
+
+
+class CategoryCreate(CategoryBase):
+    type: CategoryType
+
+
+class CategoryRead(CategoryBase):
+    uuid: str
+    type: CategoryType
+    creator: 'schemas.UserRead'
+
+
+class CategoryUpdate(CategoryBase):
+    type: CategoryType

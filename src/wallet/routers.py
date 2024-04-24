@@ -5,7 +5,7 @@ from database.database import get_async_session
 from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
-from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate
+from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate, CategoryCreate, CategoryRead
 from . import services
 
 
@@ -99,3 +99,35 @@ async def delete_account(
         )
     
     return await services.AccountService(session).delete_account(uuid)
+
+
+@router.post('/categories', tags=['Categories'], status_code=status.HTTP_201_CREATED)
+async def create_category(
+    category_data: CategoryCreate,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> CategoryRead:
+    return await services.CategoryService(session).create_category(category_data, current_user)
+
+
+@router.get('/categories/{uuid}', tags=['Categories'])
+async def get_category_by_uuid(
+    uuid: str,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> CategoryRead:
+    category = await services.CategoryService(session).get_category_by_uuid(uuid)
+
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Category is not found.',
+        )
+    
+    if category.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot read this category, because you are not the creator.',
+        )
+    
+    return category

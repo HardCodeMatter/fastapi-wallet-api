@@ -37,7 +37,7 @@ class CategoryType(enum.Enum):
 class Category(Base):
     __tablename__ = 'categories'
 
-    uuid: Mapped[str] = mapped_column(primary_key=True, default=str(uuid.uuid4()))
+    uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(30))
     type: Mapped[CategoryType]
 
