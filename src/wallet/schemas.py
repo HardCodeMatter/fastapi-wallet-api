@@ -1,3 +1,4 @@
+import re
 from fastapi import HTTPException, status
 from pydantic import BaseModel, field_validator
 
@@ -21,7 +22,7 @@ class AccountBase(BaseModel):
         if len(value.strip()) < 3 or len(value.strip()) > 30:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail='Username must be between 3 and 30 characters in length, inclusive.',
+                detail='Account name must be between 3 and 30 characters in length, inclusive.',
             )
 
         return value.strip()
@@ -48,6 +49,23 @@ class AccountUpdate(AccountBase):
 
 class CategoryBase(BaseModel):
     name: str
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        if len(value.strip()) < 3 or len(value.strip()) > 30:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Category name must be between 3 and 30 characters in length, inclusive.',
+            )
+        
+        if not re.match(r'^[a-zA-Z\s]+$', value.strip()):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Category name must only contain letters.',
+            )
+        
+        return value.strip().capitalize()
 
 
 class CategoryCreate(CategoryBase):

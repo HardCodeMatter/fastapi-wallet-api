@@ -103,7 +103,6 @@ class CategoryService(BaseService):
 
         self.session.add(category)
         await self.session.commit()
-        await self.session.refresh(category)
 
         return category
 
