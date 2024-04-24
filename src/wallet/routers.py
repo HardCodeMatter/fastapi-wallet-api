@@ -5,7 +5,7 @@ from database.database import get_async_session
 from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
-from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate, CategoryCreate, CategoryRead
+from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate, CategoryCreate, CategoryRead, CategoryUpdate
 from . import services
 
 
@@ -131,3 +131,44 @@ async def get_category_by_uuid(
         )
     
     return category
+
+
+@router.patch('/categories/{uuid}', tags=['Categories'])
+async def update_category(
+    uuid: str,
+    category_data: CategoryUpdate,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> CategoryRead:
+    category = await services.CategoryService(session).get_category_by_uuid(uuid)
+
+    if category.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot update this account, because you are not creator.',
+        )
+    
+    return await services.CategoryService(session).update_category(uuid, category_data)
+
+
+@router.delete('/categories/{uuid}', tags=['Categories'])
+async def delete_category(
+    uuid: str,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> dict:
+    category = await services.CategoryService(session).get_category_by_uuid(uuid)
+
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Category is not found.',
+        )
+
+    if category.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot delete this category, because you are not creator.',
+        )
+    
+    return await services.CategoryService(session).delete_category(uuid)

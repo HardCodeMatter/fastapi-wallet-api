@@ -6,7 +6,7 @@ from services import BaseService
 from auth.models import User
 
 from .models import Account, Category
-from .schemas import AccountCreate, AccountUpdate, CategoryCreate
+from .schemas import AccountCreate, AccountUpdate, CategoryCreate, CategoryUpdate
 
 
 class AccountService(BaseService):
@@ -118,3 +118,29 @@ class CategoryService(BaseService):
         await self.session.commit()
 
         return category
+    
+    async def update_category(self, uuid: str, category_data: CategoryUpdate) -> Category:
+        category = await self.get_category_by_uuid(uuid)
+
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Category is not found.',
+            )
+        
+        category.name = category_data.name
+        category.type = category_data.type
+
+        await self.session.commit()
+
+        return category
+
+    async def delete_category(self, uuid: str) -> dict:
+        category = await self.get_category_by_uuid(uuid)
+
+        await self.session.delete(category)
+        await self.session.commit()
+
+        return {
+            'detail': 'Category is deleted successful.',
+        }
