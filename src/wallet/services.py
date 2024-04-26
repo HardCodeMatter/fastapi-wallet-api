@@ -136,7 +136,6 @@ class CategoryService(BaseService):
             )
         
         category.name = category_data.name
-        category.type = category_data.type
 
         await self.session.commit()
 

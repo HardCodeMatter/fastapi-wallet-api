@@ -4,8 +4,6 @@ from pydantic import BaseModel, field_validator
 
 from auth import schemas
 
-from .models import CategoryType
-
 
 class AccountBase(BaseModel):
     name: str
@@ -68,15 +66,12 @@ class CategoryBase(BaseModel):
         return value.strip().capitalize()
 
 
-class CategoryCreate(CategoryBase):
-    type: CategoryType
+class CategoryCreate(CategoryBase): ...
 
 
 class CategoryRead(CategoryBase):
     uuid: str
-    type: CategoryType
     creator: 'schemas.UserRead'
 
 
-class CategoryUpdate(CategoryBase):
-    type: CategoryType
+class CategoryUpdate(CategoryBase): ...
