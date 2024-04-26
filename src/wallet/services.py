@@ -7,6 +7,7 @@ from auth.models import User
 
 from .models import Account, Category
 from .schemas import AccountCreate, AccountUpdate, CategoryCreate, CategoryUpdate
+from .utils import verify_unique_category_name
 
 
 class AccountService(BaseService):
@@ -96,6 +97,12 @@ class AccountService(BaseService):
 
 class CategoryService(BaseService):
     async def create_category(self, category_data: CategoryCreate, current_user: User) -> Category:
+        if await verify_unique_category_name(session=self.session, category_name=category_data.name, current_user=current_user):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail='Category with this name is already exist.',
+            )
+        
         category = Category(
             creator_id=current_user.uuid,
             **category_data.model_dump(),
