@@ -4,6 +4,8 @@ from pydantic import BaseModel, field_validator
 
 from auth import schemas
 
+from .models import RecordType
+
 
 class AccountBase(BaseModel):
     name: str
@@ -75,3 +77,15 @@ class CategoryRead(CategoryBase):
 
 
 class CategoryUpdate(CategoryBase): ...
+
+
+class RecordBase(BaseModel):
+    type: 'RecordType'
+
+
+class RecordCreate(RecordBase):
+    amount: int
+
+
+class RecordRead(RecordBase):
+    uuid: str

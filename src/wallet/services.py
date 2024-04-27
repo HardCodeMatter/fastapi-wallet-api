@@ -5,8 +5,12 @@ from sqlalchemy.orm import joinedload
 from services import BaseService
 from auth.models import User
 
-from .models import Account, Category
-from .schemas import AccountCreate, AccountUpdate, CategoryCreate, CategoryUpdate
+from .models import Account, Category, Record
+from .schemas import (
+    AccountCreate, AccountUpdate,
+    CategoryCreate, CategoryUpdate,
+    RecordCreate,
+)
 from .utils import verify_unique_category_name
 
 
@@ -150,3 +154,20 @@ class CategoryService(BaseService):
         return {
             'detail': 'Category is deleted successful.',
         }
+
+
+class RecordService(BaseService):
+    async def create_record(self) -> None: ...
+
+    async def get_record_by_uuid(self, uuid: str) -> Record:
+        stmt = select(Record).filter(Record.uuid == uuid)
+
+        record = (
+            await self.session.execute(stmt)
+        ).scalar()
+
+        await self.session.commit()
+
+        return record
+
+    async def delete_record(self) -> None: ...
