@@ -81,10 +81,12 @@ class CategoryUpdate(CategoryBase): ...
 
 class RecordBase(BaseModel):
     type: 'RecordType'
+    amount: int
 
 
 class RecordCreate(RecordBase):
-    amount: int
+    account_id: str
+    category_id: str
 
 
 class RecordRead(RecordBase):

@@ -157,7 +157,32 @@ class CategoryService(BaseService):
 
 
 class RecordService(BaseService):
-    async def create_record(self) -> None: ...
+    async def create_record(self, record_data: RecordCreate, current_user: User) -> Record:
+        account = await AccountService(self.session).get_account_by_uuid(record_data.account_id)
+
+        if not account or account.creator_id != current_user.uuid:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Account is not found.',
+            )
+        
+        category = await CategoryService(self.session).get_category_by_uuid(record_data.category_id)
+
+        if not category or category.creator_id != current_user.uuid:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Category is not found.',
+            )
+        
+        record = Record(
+            creator_id=current_user.uuid,
+            **record_data.model_dump(),
+        )
+
+        self.session.add(record)
+        await self.session.commit()
+
+        return record
 
     async def get_record_by_uuid(self, uuid: str) -> Record:
         stmt = select(Record).filter(Record.uuid == uuid)

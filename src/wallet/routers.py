@@ -5,7 +5,11 @@ from database.database import get_async_session
 from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
-from .schemas import AccountCreate, AccountRead, AccountListRead, AccountUpdate, CategoryCreate, CategoryRead, CategoryUpdate
+from .schemas import (
+    AccountCreate, AccountRead, AccountListRead, AccountUpdate,
+    CategoryCreate, CategoryRead, CategoryUpdate,
+    RecordCreate, RecordRead,
+)
 from . import services
 
 
@@ -172,3 +176,29 @@ async def delete_category(
         )
     
     return await services.CategoryService(session).delete_category(uuid)
+
+
+@router.post('/records', tags=['Records'], status_code=status.HTTP_201_CREATED)
+async def create_record(
+    record_data: RecordCreate,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> RecordRead:
+    return await services.RecordService(session).create_record(record_data, current_user)
+
+
+@router.get('/records/{uuid}', tags=['Records'])
+async def get_record_by_uuid(
+    uuid: str,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> RecordRead:
+    record = await services.RecordService(session).get_record_by_uuid(uuid)
+
+    if not record or record.creator_id != current_user.uuid:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Record is not found.',
+        )
+    
+    return record

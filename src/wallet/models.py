@@ -57,7 +57,7 @@ class RecordType(enum.Enum):
 class Record(Base):
     __tablename__ = 'records'
 
-    uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4))
+    uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     type: Mapped[RecordType]
     amount: Mapped[int]
 
