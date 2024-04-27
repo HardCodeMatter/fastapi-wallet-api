@@ -202,3 +202,12 @@ async def get_record_by_uuid(
         )
     
     return record
+
+
+@router.delete('/records/{uuid}', tags=['Records'])
+async def delete_record(
+    uuid: str,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> dict:
+    return await services.RecordService(session).delete_record(uuid, current_user)

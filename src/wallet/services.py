@@ -195,4 +195,18 @@ class RecordService(BaseService):
 
         return record
 
-    async def delete_record(self) -> None: ...
+    async def delete_record(self, uuid: str, current_user: User) -> dict:
+        record = await self.get_record_by_uuid(uuid)
+
+        if not record or record.creator_id != current_user.uuid:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Record is not found.',
+            )
+        
+        await self.session.delete(record)
+        await self.session.commit()
+        
+        return {
+            'detail': 'Record is deleted successful.'
+        }
