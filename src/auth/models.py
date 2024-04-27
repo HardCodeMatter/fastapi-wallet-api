@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database.database import Base
 
 if typing.TYPE_CHECKING:
-    from wallet.models import Account, Category
+    from wallet.models import Account, Category, Record
 
 
 class User(Base):
@@ -21,6 +21,7 @@ class User(Base):
 
     accounts: Mapped[list['Account']] = relationship(back_populates='creator')
     categories: Mapped[list['Category']] = relationship(back_populates='creator')
+    records: Mapped[list['Record']] = relationship(back_populates='creator')
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
