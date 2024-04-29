@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from services import BaseService
 from auth.models import User
@@ -71,6 +71,25 @@ class AccountService(BaseService):
         await self.session.commit()
 
         return accounts
+    
+    async def get_account_with_records(self, uuid: str, current_user: User) -> Account:
+        account = (
+            await self.session.execute(
+                select(Account)
+                .filter(Account.uuid == uuid, Account.creator_id == current_user.uuid, Record.account_id == uuid)
+                .options(selectinload(Account.records))
+            )
+        ).scalar()
+
+        if not account:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Account is not found.',
+            )
+
+        await self.session.commit()
+
+        return account
 
     async def update_account(self, uuid: int, account_data: AccountUpdate) -> Account:
         account = await self.get_account_by_uuid(uuid)

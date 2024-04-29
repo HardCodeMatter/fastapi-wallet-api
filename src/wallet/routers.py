@@ -6,9 +6,9 @@ from auth.models import User
 from auth.utils import get_current_user, get_current_active_user
 
 from .schemas import (
-    AccountCreate, AccountRead, AccountListRead, AccountUpdate,
+    AccountCreate, AccountRead, AccountWithRecords, AccountListRead, AccountUpdate,
     CategoryCreate, CategoryRead, CategoryUpdate,
-    RecordCreate, RecordRead,
+    RecordCreate, RecordRead
 )
 from . import services
 
@@ -62,6 +62,15 @@ async def get_account_by_name(
         )
     
     return account
+
+
+@router.get('/accounts/{uuid}/records', tags=['Accounts'])
+async def get_records_by_account(
+    uuid: str,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> AccountWithRecords:
+    return await services.AccountService(session).get_account_with_records(uuid, current_user)
 
 
 @router.patch('/accounts/{uuid}', tags=['Accounts'])

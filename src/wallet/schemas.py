@@ -38,6 +38,12 @@ class AccountRead(AccountBase):
     creator: 'schemas.UserRead'
 
 
+class AccountWithRecords(AccountBase):
+    uuid: str
+    is_private: bool
+    records: list['RecordRead']
+
+
 class AccountListRead(AccountBase):
     uuid: str
     is_private: bool
