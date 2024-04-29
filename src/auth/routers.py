@@ -43,7 +43,7 @@ async def signup(
     return await services.UserService(session).create_user(user_data)
 
 
-@router.get('/users/{username}/', dependencies=[Depends(get_current_user)])
+@router.get('/users', dependencies=[Depends(get_current_user)])
 async def get_user_by_username(
     username: str,
     session: AsyncSession = Depends(get_async_session),

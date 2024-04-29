@@ -25,7 +25,7 @@ async def create_account(
     return await services.AccountService(session).create_account(account_data, current_user)
 
 
-@router.get('/accounts', tags=['Accounts'])
+@router.get('/accounts/own', tags=['Accounts'], summary='Get owned accounts')
 async def get_accounts_by_creator(
     current_user: User = Depends(get_current_active_user),
     session: AsyncSession = Depends(get_async_session),
@@ -41,7 +41,7 @@ async def get_accounts_by_creator(
     return accounts
 
 
-@router.get('/accounts/{name}', tags=['Accounts'])
+@router.get('/accounts', tags=['Accounts'])
 async def get_account_by_name(
     name: str,
     current_user: User = Depends(get_current_user),
