@@ -82,6 +82,11 @@ class CategoryRead(CategoryBase):
     creator: 'schemas.UserRead'
 
 
+class CategoryWithRecords(CategoryBase):
+    uuid: str
+    records: list['RecordRead'] = None
+
+
 class CategoryUpdate(CategoryBase): ...
 
 

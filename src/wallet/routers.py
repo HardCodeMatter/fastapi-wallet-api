@@ -7,7 +7,7 @@ from auth.utils import get_current_user, get_current_active_user
 
 from .schemas import (
     AccountCreate, AccountRead, AccountWithRecords, AccountListRead, AccountUpdate,
-    CategoryCreate, CategoryRead, CategoryUpdate,
+    CategoryCreate, CategoryRead, CategoryUpdate, CategoryWithRecords,
     RecordCreate, RecordRead
 )
 from . import services
@@ -144,6 +144,15 @@ async def get_category_by_uuid(
         )
     
     return category
+
+
+@router.get('/categories/{uuid}/records', tags=['Categories'])
+async def get_category_with_records(
+    uuid: str,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> CategoryWithRecords:
+    return await services.CategoryService(session).get_category_with_records(uuid, current_user)
 
 
 @router.patch('/categories/{uuid}', tags=['Categories'])

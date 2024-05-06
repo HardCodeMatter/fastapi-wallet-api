@@ -81,7 +81,7 @@ class AccountService(BaseService):
             )
         ).scalar()
 
-        if not account:
+        if not account or (account.is_private and account.creator_id != current_user.uuid):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail='Account is not found.',
@@ -145,6 +145,27 @@ class CategoryService(BaseService):
             )
         ).scalar()
 
+        await self.session.commit()
+
+        return category
+    
+    async def get_category_with_records(self, uuid: str, current_user: User) -> Category:
+        stmt = (
+            select(Category)
+            .filter(Category.uuid == uuid, Category.creator_id == current_user.uuid, Record.category_id == uuid)
+            .options(selectinload(Category.records))
+        )
+        
+        category: Category = (
+            await self.session.execute(stmt)
+        ).scalar()
+
+        if not category or category.creator_id != current_user.uuid:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Category is not found.',
+            )
+        
         await self.session.commit()
 
         return category
