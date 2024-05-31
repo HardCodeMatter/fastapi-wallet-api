@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload, selectinload
 
 from services import BaseService
@@ -63,10 +63,18 @@ class AccountService(BaseService):
     async def get_accounts_by_creator_id(self, uuid: str) -> list[Account]:
         accounts = (
             await self.session.execute(
-                select(Account)
+                select(
+                    Account.uuid,
+                    Account.name,
+                    Account.creator_id,
+                    Account.is_private,
+                    func.coalesce(func.sum(Record.amount), 0).label('amount')
+                )
                 .filter(Account.creator_id == uuid)
+                .join(Record, Record.account_id == Account.uuid, isouter=True)
+                .group_by(Account.uuid)
             )
-        ).scalars().all()
+        ).mappings().all()
 
         await self.session.commit()
 

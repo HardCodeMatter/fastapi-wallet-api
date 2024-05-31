@@ -1,6 +1,6 @@
 import re
 from fastapi import HTTPException, status
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from auth import schemas
 
@@ -46,7 +46,9 @@ class AccountWithRecords(AccountBase):
 
 class AccountListRead(AccountBase):
     uuid: str
+    creator_id: str
     is_private: bool
+    amount: int
 
 
 class AccountUpdate(AccountBase):
