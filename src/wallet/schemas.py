@@ -36,6 +36,7 @@ class AccountRead(AccountBase):
     uuid: str
     is_private: bool
     creator: 'schemas.UserRead'
+    amount: int
 
 
 class AccountWithRecords(AccountBase):

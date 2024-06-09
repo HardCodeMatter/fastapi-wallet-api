@@ -7,7 +7,7 @@ from auth.models import User
 
 from .models import Account, Category, Record
 from .schemas import (
-    AccountCreate, AccountUpdate,
+    AccountCreate, AccountUpdate, AccountRead,
     CategoryCreate, CategoryUpdate,
     RecordCreate,
 )
@@ -50,15 +50,35 @@ class AccountService(BaseService):
     async def get_account_by_name(self, name: str) -> Account:
         account = (
             await self.session.execute(
-                select(Account)
+                select(
+                    Account.uuid, Account.name, Account.is_private, Account.creator_id.label('creator_id'),
+                    User.uuid.label('user_uuid'), User.username, User.email,
+                    func.coalesce(func.sum(Record.amount), 0).label('amount')
+                )
                 .filter(Account.name == name)
-                .options(joinedload(Account.creator))
+                .join(Record, Record.account_id == Account.uuid, isouter=True)
+                .join(User, User.uuid == Account.creator_id, isouter=True)
+                .group_by(Account.uuid, User.uuid)
             )
-        ).scalar()
+        ).mappings().one()
+
+        account_data = {
+            'uuid': account['uuid'],
+            'name': account['name'],
+            'creator_id': account['creator_id'],
+            'is_private': account['is_private'],
+            'creator': {
+                'uuid': account['user_uuid'],
+                'username': account['username'],
+                'email': account['email'],
+            },
+            'amount': account['amount']
+
+        }
 
         await self.session.commit()
 
-        return account
+        return AccountRead(**account_data)
     
     async def get_accounts_by_creator_id(self, uuid: str) -> list[Account]:
         accounts = (

@@ -55,7 +55,7 @@ async def get_account_by_name(
             detail='Account with this name is not found.',
         )
     
-    if account.is_private and account.creator_id != current_user.uuid:
+    if account.is_private and account.creator.uuid != current_user.uuid:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='You cannot read this account, because it is a private.',
