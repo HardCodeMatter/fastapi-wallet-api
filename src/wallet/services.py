@@ -60,7 +60,13 @@ class AccountService(BaseService):
                 .join(User, User.uuid == Account.creator_id, isouter=True)
                 .group_by(Account.uuid, User.uuid)
             )
-        ).mappings().one()
+        ).mappings().one_or_none()
+
+        if not account:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Account with this name is not found.',
+            )
 
         account_data = {
             'uuid': account['uuid'],

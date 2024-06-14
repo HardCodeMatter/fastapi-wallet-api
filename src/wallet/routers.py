@@ -48,12 +48,6 @@ async def get_account_by_name(
     session: AsyncSession = Depends(get_async_session),
 ) -> AccountRead:
     account = await services.AccountService(session).get_account_by_name(name)
-
-    if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Account with this name is not found.',
-        )
     
     if account.is_private and account.creator.uuid != current_user.uuid:
         raise HTTPException(
