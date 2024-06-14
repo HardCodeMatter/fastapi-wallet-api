@@ -124,17 +124,11 @@ async def get_category_by_uuid(
     session: AsyncSession = Depends(get_async_session),
 ) -> CategoryRead:
     category = await services.CategoryService(session).get_category_by_uuid(uuid)
-
-    if not category:
+    
+    if category.creator.uuid != current_user.uuid:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Category is not found.',
-        )
-    
-    if category.creator_id != current_user.uuid:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='You cannot read this category, because you are not the creator.',
         )
     
     return category

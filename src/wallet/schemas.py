@@ -83,6 +83,7 @@ class CategoryCreate(CategoryBase): ...
 class CategoryRead(CategoryBase):
     uuid: str
     creator: 'schemas.UserRead'
+    amount: int
 
 
 class CategoryWithRecords(CategoryBase):

@@ -8,7 +8,7 @@ from auth.models import User
 from .models import Account, Category, Record, RecordType
 from .schemas import (
     AccountCreate, AccountUpdate, AccountRead,
-    CategoryCreate, CategoryUpdate,
+    CategoryCreate, CategoryUpdate, CategoryRead,
     RecordCreate,
 )
 from .utils import verify_unique_category_name
@@ -79,7 +79,6 @@ class AccountService(BaseService):
                 'email': account['email'],
             },
             'amount': account['amount']
-
         }
 
         await self.session.commit()
@@ -173,15 +172,38 @@ class CategoryService(BaseService):
     async def get_category_by_uuid(self, uuid: str) -> Category:
         category = (
             await self.session.execute(
-                select(Category)
+                select(
+                    Category.uuid, Category.name,
+                    User.uuid.label('user_uuid'), User.username, User.email,
+                    func.coalesce(func.sum(Record.amount), 0).label('amount')
+                )
                 .filter(Category.uuid == uuid)
-                .options(joinedload(Category.creator))
+                .join(Record, Record.category_id == Category.uuid, isouter=True)
+                .join(User, User.uuid == Category.creator_id, isouter=True)
+                .group_by(Category.uuid, User.uuid)
             )
-        ).scalar()
+        ).mappings().one_or_none()
+
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Category is not found.',
+            )
+
+        category_data = {
+            'uuid': category['uuid'],
+            'name': category['name'],
+            'creator': {
+                'uuid': category['user_uuid'],
+                'username': category['username'],
+                'email': category['email'],
+            },
+            'amount': category['amount']
+        }
 
         await self.session.commit()
 
-        return category
+        return CategoryRead(**category_data)
     
     async def get_category_with_records(self, uuid: str, current_user: User) -> Category:
         stmt = (
