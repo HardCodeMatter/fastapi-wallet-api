@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from services import BaseService
 from auth.models import User
 
-from .models import Account, Category, Record
+from .models import Account, Category, Record, RecordType
 from .schemas import (
     AccountCreate, AccountUpdate, AccountRead,
     CategoryCreate, CategoryUpdate,
@@ -241,10 +241,15 @@ class RecordService(BaseService):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail='Category is not found.',
             )
+
+        amount: RecordType = record_data.amount if record_data.type == RecordType.income else -(record_data.amount)
         
+        record_dict = record_data.model_dump()
+        record_dict['amount'] = amount
+
         record = Record(
             creator_id=current_user.uuid,
-            **record_data.model_dump(),
+            **record_dict,
         )
 
         self.session.add(record)
