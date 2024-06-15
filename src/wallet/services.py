@@ -205,6 +205,25 @@ class CategoryService(BaseService):
 
         return CategoryRead(**category_data)
     
+    async def get_categories_by_creator_id(self, user_uuid: str) -> list[Category]:
+        categories = (
+            await self.session.execute(
+                select(
+                    Category.uuid,
+                    Category.name,
+                    Category.creator_id,
+                    func.coalesce(func.sum(Record.amount), 0).label('amount')
+                )
+                .filter(Category.creator_id == user_uuid)
+                .join(Record, Record.category_id == Category.uuid, isouter=True)
+                .group_by(Category.uuid, Record.category_id)
+            )
+        ).mappings().all()
+        
+        await self.session.commit()
+
+        return categories
+    
     async def get_category_with_records(self, uuid: str, current_user: User) -> Category:
         stmt = (
             select(Category)

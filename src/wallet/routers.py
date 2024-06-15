@@ -7,7 +7,7 @@ from auth.utils import get_current_user, get_current_active_user
 
 from .schemas import (
     AccountCreate, AccountRead, AccountWithRecords, AccountListRead, AccountUpdate,
-    CategoryCreate, CategoryRead, CategoryUpdate, CategoryWithRecords,
+    CategoryCreate, CategoryRead, CategoryUpdate, CategoryListRead, CategoryWithRecords,
     RecordCreate, RecordRead
 )
 from . import services
@@ -117,7 +117,7 @@ async def create_category(
     return await services.CategoryService(session).create_category(category_data, current_user)
 
 
-@router.get('/categories/{uuid}', tags=['Categories'])
+@router.get('/categories', tags=['Categories'])
 async def get_category_by_uuid(
     uuid: str,
     current_user: User = Depends(get_current_user),
@@ -132,6 +132,22 @@ async def get_category_by_uuid(
         )
     
     return category
+
+
+@router.get('/categories/own', tags=['Categories'], summary='Get owned categories')
+async def get_categories_by_creator(
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_async_session),
+) -> list[CategoryListRead]:
+    categories = await services.CategoryService(session).get_categories_by_creator_id(current_user.uuid)
+    
+    if not categories:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Categories are not found.',
+        )
+
+    return categories
 
 
 @router.get('/categories/{uuid}/records', tags=['Categories'])

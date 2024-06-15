@@ -91,6 +91,13 @@ class CategoryWithRecords(CategoryBase):
     records: list['RecordRead'] = None
 
 
+class CategoryListRead(CategoryBase):
+    uuid: str
+    name: str
+    creator_id: str
+    amount: int
+
+
 class CategoryUpdate(CategoryBase): ...
 
 
